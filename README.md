@@ -22,6 +22,7 @@ A Linux system monitor with a retro design!
   - Temperature monitoring
   - Battery level (if present)
   - Active processes
+  - Distro name and version
 
 - **Retro-Style UI**
   - ASCII art borders and decorations
@@ -36,7 +37,12 @@ A Linux system monitor with a retro design!
   - Smart error handling and system calls
 
 - **System Integration**
-  - Direct Linux system stats reading (`/proc`, `/sys`)
+  - Direct Linux system stats reading:
+    - `/proc/stat` for CPU usage
+    - `/proc/meminfo` for RAM stats
+    - `/sys/class/thermal/thermal_zone0/temp` for CPU temperature
+    - `/sys/class/power_supply/BAT0/*` for battery info
+    - `/etc/os-release` for distribution info
   - Real-time process monitoring
   - Hardware status tracking (CPU, RAM, Battery)
 

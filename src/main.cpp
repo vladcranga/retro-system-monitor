@@ -122,6 +122,7 @@ int main() {
         auto mem_stats = monitor.getMemoryStats();
         float cpu_temp = monitor.getCPUTemp();
         auto processes = monitor.getTopProcesses();
+        auto distro_info = monitor.getDistroInfo();
 
         // Draw the main border
         attron(COLOR_PAIR(2));
@@ -134,35 +135,38 @@ int main() {
         print_centered_text(1, "/-[ RETRO SYSTEM MONITOR ]-\\");
         attroff(COLOR_PAIR(2));
 
+        // Distro Info
+        print_centered_text(3, "Running on %s", distro_info.name.c_str());
+
         // CPU Usage Percent
         attron(COLOR_PAIR(1));
-        print_centered_text(4, "<<< CPU STATUS >>>");
+        print_centered_text(5, "<<< CPU STATUS >>>");
         draw_status_bar(
-            5, getmaxx(stdscr) / 2 - 10, cpu_stats.usage_percent, 20, true);
+            6, getmaxx(stdscr) / 2 - 10, cpu_stats.usage_percent, 20, true);
 
         // Temperature with color coding
         if (cpu_temp > 80) attron(COLOR_PAIR(4));
         else if (cpu_temp > 60) attron(COLOR_PAIR(3));
-        print_centered_text(6, "TEMP: %.1f°C", cpu_temp);
+        print_centered_text(7, "TEMP: %.1f°C", cpu_temp);
 
         // CPU Status
         std::string cpu_status = get_status_message(cpu_stats.usage_percent);
-        print_centered_text(7, "Status: %s", cpu_status.c_str());
+        print_centered_text(8, "Status: %s", cpu_status.c_str());
 
         attroff(COLOR_PAIR(1));
 
         // RAM Status
         attron(COLOR_PAIR(6));
-        print_centered_text(9, "<<< RAM STATUS >>>");
-        draw_status_bar(10, getmaxx(stdscr) / 2 - 10, mem_stats.usage_percent, 20, false);
+        print_centered_text(10, "<<< RAM STATUS >>>");
+        draw_status_bar(11, getmaxx(stdscr) / 2 - 10, mem_stats.usage_percent, 20, false);
 
         // RAM Usage
-        print_centered_text(11, "Total RAM: %s", format_memory(mem_stats.total).c_str());
-        print_centered_text(12, "Used  RAM: %s", format_memory(mem_stats.used).c_str());
-        print_centered_text(13, "Free  RAM: %s", format_memory(mem_stats.free).c_str());
+        print_centered_text(12, "Total RAM: %s", format_memory(mem_stats.total).c_str());
+        print_centered_text(13, "Used  RAM: %s", format_memory(mem_stats.used).c_str());
+        print_centered_text(14, "Free  RAM: %s", format_memory(mem_stats.free).c_str());
 
         std::string mem_status = get_status_message(mem_stats.usage_percent);
-        print_centered_text(14, "Status: %s", mem_status.c_str());
+        print_centered_text(15, "Status: %s", mem_status.c_str());
 
         attroff(COLOR_PAIR(6));
 
@@ -170,7 +174,7 @@ int main() {
         auto battery_stats = monitor.getBatteryStats();
         if (battery_stats.present) {
             attron(COLOR_PAIR(3));
-            print_centered_text(16, "<<< BATTERY STATUS >>>");
+            print_centered_text(17, "<<< BATTERY STATUS >>>");
             
             // Battery bar with an appropriate colour
             std::string energy_prefix = battery_stats.charging ? "[+" : "[";
@@ -187,25 +191,25 @@ int main() {
             for (int i = 0; i < filled; i++) bar += "*";
             for (int i = filled; i < width; i++) bar += "-";
             
-            print_centered_text(17, "%s%s] %3.1f%%", energy_prefix.c_str(), bar.c_str(), battery_stats.percentage);
+            print_centered_text(18, "%s%s] %3.1f%%", energy_prefix.c_str(), bar.c_str(), battery_stats.percentage);
             
             // Colour based on the battery status
             if (battery_stats.charging) {
                 attron(COLOR_PAIR(1));
-                print_centered_text(18, "* Charging *");
+                print_centered_text(19, "* Charging *");
             } else if (battery_stats.percentage <= 20) {
                 attron(COLOR_PAIR(4));
                 beep();
-                print_centered_text(18, "! Low Battery !");
+                print_centered_text(19, "! Low Battery !");
             }
             attron(COLOR_PAIR(1));
         }
 
         // Process Section
         attron(COLOR_PAIR(5));
-        print_centered_text(20, "<<< TOP PROCESSES >>>");
+        print_centered_text(21, "<<< TOP PROCESSES >>>");
         for (size_t i = 0; i < processes.size(); ++i) {
-            print_centered_text(21 + i, "* %s", processes[i].c_str());
+            print_centered_text(22 + i, "* %s", processes[i].c_str());
         }
         attroff(COLOR_PAIR(5));
 

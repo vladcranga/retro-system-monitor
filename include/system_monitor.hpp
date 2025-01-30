@@ -34,6 +34,11 @@ public:
         std::string status;
     };
 
+    struct DistroInfo {
+        // Distro name (may include version)
+        std::string name;
+    };
+
     // Constructor
     SystemMonitor();
 
@@ -46,6 +51,7 @@ public:
     float getCPUTemp() const { return cpu_temp; }
     BatteryStats getBatteryStats() const { return battery_stats; }
     std::vector<std::string> getTopProcesses(int count = 5) const;
+    DistroInfo getDistroInfo() const { return distro_info; }
 
 private:
     // Update methods
@@ -54,6 +60,7 @@ private:
     void updateCPUTemp();
     void updateBattery();
     void updateProcesses();
+    void updateDistroInfo();
 
     // Variable declarations
     CPUStats cpu_stats;
@@ -62,4 +69,5 @@ private:
     float cpu_temp;
     BatteryStats battery_stats;
     std::vector<std::string> top_processes;
+    DistroInfo distro_info;
 };

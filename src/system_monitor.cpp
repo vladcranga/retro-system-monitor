@@ -6,6 +6,9 @@
 #include <dirent.h>
 
 SystemMonitor::SystemMonitor() {
+    // Get distro info once at startup
+    updateDistroInfo();
+    // Get initial stats
     update();
 }
 
@@ -132,6 +135,27 @@ void SystemMonitor::updateProcesses() {
     std::sort(processes.begin(), processes.end());
     top_processes = std::vector<std::string>(processes.begin(), 
                                            processes.begin() + std::min(size_t(5), processes.size()));
+}
+
+void SystemMonitor::updateDistroInfo() {
+    std::ifstream os_release("/etc/os-release");
+    std::string line;
+    
+    // Initialise with default value
+    distro_info.name = "Linux";
+    
+    if (os_release.is_open()) {
+        while (std::getline(os_release, line)) {
+            if (line.find("PRETTY_NAME=") == 0) {
+                size_t start = line.find('"');
+                size_t end = line.find_last_of('"');
+                if (start != std::string::npos && end != std::string::npos && start < end) {
+                    distro_info.name = line.substr(start + 1, end - start - 1);
+                }
+                break;
+            }
+        }
+    }
 }
 
 std::vector<std::string> SystemMonitor::getTopProcesses(int count) const {

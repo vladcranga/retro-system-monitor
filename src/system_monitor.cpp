@@ -20,16 +20,6 @@ SystemMonitor::SystemMonitor() {
     update();
 }
 
-void SystemMonitor::setUpdateIntervals(unsigned int cpu, unsigned int memory, 
-                                     unsigned int cpuTemp, unsigned int battery, 
-                                     unsigned int processes) {
-    cpu_update_interval = cpu;
-    memory_update_interval = memory;
-    cpu_temp_update_interval = cpuTemp;
-    battery_update_interval = battery;
-    processes_update_interval = processes;
-}
-
 bool SystemMonitor::shouldUpdate(std::chrono::time_point<std::chrono::steady_clock>& lastUpdate, 
                                unsigned int interval) {
     auto now = std::chrono::steady_clock::now();
@@ -159,11 +149,9 @@ void SystemMonitor::updateBattery() {
 
 void SystemMonitor::updateProcesses() {
     std::vector<std::string> processes;
-    DIR* dir = opendir("/proc");
-    struct dirent* ent;
-    
+    DIR* dir = opendir("/proc");    
     if (dir != nullptr) {
-        while ((ent = readdir(dir)) != nullptr) {
+        while (struct dirent* ent = readdir(dir)) {
             // Only process directories (PIDs)
             if (std::isdigit(ent->d_name[0])) {
                 std::string cmd_path = "/proc/" + std::string(ent->d_name) + "/comm";
@@ -191,7 +179,7 @@ void SystemMonitor::updateDistroInfo() {
     
     if (os_release.is_open()) {
         while (std::getline(os_release, line)) {
-            if (line.find("PRETTY_NAME=") == 0) {
+            if (line.starts_with("PRETTY_NAME=")) {
                 size_t start = line.find('"');
                 size_t end = line.find_last_of('"');
                 if (start != std::string::npos && end != std::string::npos && start < end) {

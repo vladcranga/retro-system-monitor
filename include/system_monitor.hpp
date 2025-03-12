@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <chrono>
 
 // Encapsulate the system monitoring functionality
 class SystemMonitor {
@@ -52,6 +53,11 @@ public:
     BatteryStats getBatteryStats() const { return battery_stats; }
     std::vector<std::string> getTopProcesses(int count = 5) const;
     DistroInfo getDistroInfo() const { return distro_info; }
+    
+    // Configure update intervals (in milliseconds)
+    void setUpdateIntervals(unsigned int cpu, unsigned int memory, 
+                           unsigned int cpuTemp, unsigned int battery, 
+                           unsigned int processes);
 
 private:
     // Update methods
@@ -62,7 +68,11 @@ private:
     void updateProcesses();
     void updateDistroInfo();
 
-    // Variable declarations
+    // Check if update is needed based on elapsed time
+    bool shouldUpdate(std::chrono::time_point<std::chrono::steady_clock>& lastUpdate, 
+                     unsigned int interval);
+
+    // Member variables
     CPUStats cpu_stats;
     CPUStats cpu_stats_prev;
     MemoryStats mem_stats;
@@ -70,4 +80,18 @@ private:
     BatteryStats battery_stats;
     std::vector<std::string> top_processes;
     DistroInfo distro_info;
+    
+    // Last update timestamps
+    std::chrono::time_point<std::chrono::steady_clock> last_cpu_update;
+    std::chrono::time_point<std::chrono::steady_clock> last_memory_update;
+    std::chrono::time_point<std::chrono::steady_clock> last_cpu_temp_update;
+    std::chrono::time_point<std::chrono::steady_clock> last_battery_update;
+    std::chrono::time_point<std::chrono::steady_clock> last_processes_update;
+    
+    // Update intervals in milliseconds
+    unsigned int cpu_update_interval = 1000;      // 1 second
+    unsigned int memory_update_interval = 3000;   // 3 seconds
+    unsigned int cpu_temp_update_interval = 5000; // 5 seconds
+    unsigned int battery_update_interval = 30000; // 30 seconds
+    unsigned int processes_update_interval = 3000; // 3 seconds
 };

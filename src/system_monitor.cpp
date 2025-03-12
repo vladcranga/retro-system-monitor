@@ -6,18 +6,63 @@
 #include <dirent.h>
 
 SystemMonitor::SystemMonitor() {
+    // Initialise timestamps to ensure first update happens immediately
+    auto now = std::chrono::steady_clock::now();
+    last_cpu_update = now - std::chrono::hours(1);
+    last_memory_update = now - std::chrono::hours(1);
+    last_cpu_temp_update = now - std::chrono::hours(1);
+    last_battery_update = now - std::chrono::hours(1);
+    last_processes_update = now - std::chrono::hours(1);
+
     // Get distro info once at startup
     updateDistroInfo();
     // Get initial stats
     update();
 }
 
+void SystemMonitor::setUpdateIntervals(unsigned int cpu, unsigned int memory, 
+                                     unsigned int cpuTemp, unsigned int battery, 
+                                     unsigned int processes) {
+    cpu_update_interval = cpu;
+    memory_update_interval = memory;
+    cpu_temp_update_interval = cpuTemp;
+    battery_update_interval = battery;
+    processes_update_interval = processes;
+}
+
+bool SystemMonitor::shouldUpdate(std::chrono::time_point<std::chrono::steady_clock>& lastUpdate, 
+                               unsigned int interval) {
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdate).count();
+    
+    if (elapsed >= interval) {
+        lastUpdate = now;
+        return true;
+    }
+    return false;
+}
+
 void SystemMonitor::update() {
-    updateCPU();
-    updateMemory();
-    updateCPUTemp();
-    updateBattery();
-    updateProcesses();
+    // Only update metrics when their interval has elapsed
+    if (shouldUpdate(last_cpu_update, cpu_update_interval)) {
+        updateCPU();
+    }
+    
+    if (shouldUpdate(last_memory_update, memory_update_interval)) {
+        updateMemory();
+    }
+    
+    if (shouldUpdate(last_cpu_temp_update, cpu_temp_update_interval)) {
+        updateCPUTemp();
+    }
+    
+    if (shouldUpdate(last_battery_update, battery_update_interval)) {
+        updateBattery();
+    }
+    
+    if (shouldUpdate(last_processes_update, processes_update_interval)) {
+        updateProcesses();
+    }
 }
 
 void SystemMonitor::updateCPU() {

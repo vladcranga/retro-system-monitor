@@ -66,25 +66,42 @@ void SystemMonitor::updateCPU() {
         
         ss >> cpu >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal;
         
-        cpu_stats_prev = cpu_stats;
-        cpu_stats.user = user;
-        cpu_stats.nice = nice;
-        cpu_stats.system = system;
-        cpu_stats.idle = idle;
-        
         // Skip first calculation
         if (cpu_stats_prev.user != 0) {
             unsigned long long prev_idle = cpu_stats_prev.idle;
             unsigned long long prev_total = cpu_stats_prev.user + cpu_stats_prev.nice + 
                                           cpu_stats_prev.system + cpu_stats_prev.idle;
-            unsigned long long curr_idle = idle;
             unsigned long long curr_total = user + nice + system + idle;
             
-            unsigned long long total_diff = curr_total - prev_total;
-            unsigned long long idle_diff = curr_idle - prev_idle;
-            
-            cpu_stats.usage_percent = ((total_diff - idle_diff) * 100.0) / total_diff;
+            // Ensure there is valid data for calculation
+            if (curr_total > prev_total) {
+                unsigned long long curr_idle = idle;
+                unsigned long long total_diff = curr_total - prev_total;
+                unsigned long long idle_diff = curr_idle - prev_idle;
+                
+                // Calculate CPU usage percentage
+                cpu_stats.usage_percent = ((total_diff - idle_diff) * 100.0) / total_diff;
+                
+                // Sanity check
+                if (cpu_stats.usage_percent > 100.0) {
+                    cpu_stats.usage_percent = 100.0;
+                }
+                
+                // There is a valid measurement
+                cpu_stats.has_valid_measurement = true;
+            }
+        } else {
+            // Set default values for the first reading
+            cpu_stats.usage_percent = 0.0;
+            cpu_stats.has_valid_measurement = false;
         }
+        
+        // Update the previous stats for the next calculation
+        cpu_stats_prev = cpu_stats;
+        cpu_stats.user = user;
+        cpu_stats.nice = nice;
+        cpu_stats.system = system;
+        cpu_stats.idle = idle;
     }
 }
 

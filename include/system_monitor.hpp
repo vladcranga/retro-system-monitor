@@ -14,6 +14,8 @@ public:
         unsigned long long nice;
         unsigned long long system;
         unsigned long long idle;
+        // Boolean to check if we have valid CPU measurements
+        bool has_valid_measurement = false;
     };
 
     struct MemoryStats {

@@ -141,17 +141,25 @@ int main() {
         // CPU Usage Percent
         attron(COLOR_PAIR(1));
         print_centered_text(5, "<<< CPU STATUS >>>");
-        draw_status_bar(
-            6, getmaxx(stdscr) / 2 - 10, cpu_stats.usage_percent, 20, true);
+        
+        if (cpu_stats.has_valid_measurement) {
+            // Display the CPU usage
+            draw_status_bar(
+                6, getmaxx(stdscr) / 2 - 10, cpu_stats.usage_percent, 20, true);
+                
+            // Display the CPU status
+            std::string cpu_status = get_status_message(cpu_stats.usage_percent);
+            print_centered_text(8, "Status: %s", cpu_status.c_str());
+        } else {
+            // Display an informational message instead of the status bar
+            print_centered_text(6, "[    Calculating...    ]");
+            print_centered_text(8, "Status: Initializing");
+        }
 
         // Temperature with color coding
         if (cpu_temp > 80) attron(COLOR_PAIR(4));
         else if (cpu_temp > 60) attron(COLOR_PAIR(3));
         print_centered_text(7, "TEMP: %.1f°C", cpu_temp);
-
-        // CPU Status
-        std::string cpu_status = get_status_message(cpu_stats.usage_percent);
-        print_centered_text(8, "Status: %s", cpu_status.c_str());
 
         attroff(COLOR_PAIR(1));
 

@@ -71,26 +71,24 @@ void SystemMonitor::updateCPU() {
             unsigned long long prev_idle = cpu_stats_prev.idle;
             unsigned long long prev_total = cpu_stats_prev.user + cpu_stats_prev.nice + 
                                           cpu_stats_prev.system + cpu_stats_prev.idle;
-            unsigned long long curr_idle = idle;
             unsigned long long curr_total = user + nice + system + idle;
             
             // Ensure there is valid data for calculation
-            if (curr_total > prev_total && curr_idle >= prev_idle) {
+            if (curr_total > prev_total) {
+                unsigned long long curr_idle = idle;
                 unsigned long long total_diff = curr_total - prev_total;
                 unsigned long long idle_diff = curr_idle - prev_idle;
                 
-                // Avoid division by zero and ensure reasonable values
-                if (total_diff > 0) {
-                    cpu_stats.usage_percent = ((total_diff - idle_diff) * 100.0) / total_diff;
-                    
-                    // Sanity check
-                    if (cpu_stats.usage_percent > 100.0) {
-                        cpu_stats.usage_percent = 100.0;
-                    }
-                    
-                    // There is a valid measurement
-                    cpu_stats.has_valid_measurement = true;
+                // Calculate CPU usage percentage
+                cpu_stats.usage_percent = ((total_diff - idle_diff) * 100.0) / total_diff;
+                
+                // Sanity check
+                if (cpu_stats.usage_percent > 100.0) {
+                    cpu_stats.usage_percent = 100.0;
                 }
+                
+                // There is a valid measurement
+                cpu_stats.has_valid_measurement = true;
             }
         } else {
             // Set default values for the first reading
